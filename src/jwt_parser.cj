@@ -29,7 +29,7 @@ public class JWTParser {
         let jwsHeader = JWSHeader(headMap)
 
         // 签名校验
-        let hmac = HMAC(secret.toArray(),jwsHeader.alg |> SignatureAlgorithm.fromName)
+        let hmac = HMAC(secret.toArray(),HashType.SHA256)
         let sBase64 = digest(hmac, "${tokenArr[0]}.${tokenArr[1]}") |> toBase64String|> JwtUtil.format
         if(sBase64 != tokenArr[2]){
             throw IllegalStateException("token is not valid")

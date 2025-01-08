@@ -48,11 +48,14 @@ public class JWTBuilder{
         let pBase64 = claims.serialize().toJson().toString().toArray() |> toBase64String|> JwtUtil.format
 
         // 签名
-        let hmac = HMAC(secret.toArray(),alg.hashType())
-        let sBase64 = digest(hmac, "${hBase64}.${pBase64}") |> toBase64String|> JwtUtil.format
+        let sBase64 = JwtUtil.sign(secret, alg, "${hBase64}.${pBase64}")
+
 
         return "${hBase64}.${pBase64}.${sBase64}"
     }
+
+
+
 
     public func setIssuer( iss:String):JWTBuilder{
         claims.put("iss", iss)
