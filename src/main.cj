@@ -27,38 +27,32 @@ z6YJXqlEAHXbsvLnMeo=
 -----END PUBLIC KEY-----'''
 
 
-main() {
-    var priKey = "your-private-key-here"
-    var value = "the-value-to-sign"
-    var signature = ecdsa(priKey, value)
-    println("Signature: ${signature}")
+
+main(): Int64 {
+
+    let secret = "hellow"
+
+    let jwt = JWT.builder()
+    let claims = HashMap<String,String>()
+    claims.put("name", "张w三2")
+    claims.put("age", "23")
+    // let token = jwt.signWith(HS256,secret)
+    let token = jwt.signWith(ES512,privatekey)
+    .setClaims(claims)
+    .setId("123")
+    .compact()
+    println("---")
+    println(token)
+    println("---")
+    
+    // let jws = JWT.parser()
+    // .setSecret(secret)
+    // .parseClaimsJws(token)
+    
+    // println(jws.header.kvMap.serialize().toJson())
+    // println(jws.claims.kvMap.serialize().toJson())
+
+
+
+    return 0
 }
-
-// main(): Int64 {
-
-//     let secret = "hellow"
-
-//     let jwt = JWT.builder()
-//     let claims = HashMap<String,String>()
-//     claims.put("name", "张w三2")
-//     claims.put("age", "23")
-//     // let token = jwt.signWith(HS256,secret)
-//     let token = jwt.signWith(ES512,privatekey)
-//     .setClaims(claims)
-//     .setId("123")
-//     .compact()
-//     println("---")
-//     println(token)
-//     println("---")
-    
-//     // let jws = JWT.parser()
-//     // .setSecret(secret)
-//     // .parseClaimsJws(token)
-    
-//     // println(jws.header.kvMap.serialize().toJson())
-//     // println(jws.claims.kvMap.serialize().toJson())
-
-
-
-//     return 0
-// }

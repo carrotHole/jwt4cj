@@ -49,8 +49,11 @@ internal  class JwtUtil {
 
     private static func ecdsa(secret:String, digestIns: Digest, value:String):String{    
         ECDSAPrivateKey.decodeFromPem(secret)  
-        var md = digest(digestIns, value.toArray())
-        return ECDSAPrivateKey.decodeFromPem(secret).sign(md) |> toBase64String |> format
+
+
+        ECDSAPrivateKey.decodeFromPem("").sign(md)
+
+        return ECDSAPrivateKey.decodeFromPem(secret).sign(md) |> convertEcdsa
     }
 
     private static func rs(secret:String, digestIns: Digest, value:String):String{
@@ -60,13 +63,6 @@ internal  class JwtUtil {
     private static func ps(secret:String, digestIns: Digest, value:String):String{
         println("pss type")
         return RSAPrivateKey.decodeFromPem(secret).sign(digestIns, digest(digestIns, value), padType: PSS(PSSOption(12))) |> toBase64String |> format
-    }
-    private static func ecdsa(priKey:String,  value:String):String{    
-
-        // value的sha256 hash值  
-        var md = digest(digestIns, value.toArray())
-        //todo 调用openssl 签名
-        
     }
 
 }

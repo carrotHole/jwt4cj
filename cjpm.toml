@@ -11,4 +11,11 @@
   src-dir = ""
   target-dir = ""
   version = "1.0.0"
-  package-configuration = {}
+  [package.package-configuration]
+
+[ffi]
+  [ffi.c]
+    [ffi.c.crypto-3-x64]
+      path = "C:/Program Files/OpenSSL-Win64/bin"
+    [ffi.c.ssl-3-x64]
+      path = "C:/Program Files/OpenSSL-Win64/bin"
