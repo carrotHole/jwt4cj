@@ -18,7 +18,7 @@ public class JWTBuilder{
     private let header:HashMap<String,String> = HashMap<String,String>()
 
     public func setClaims(claims: Map<String, String>): JWTBuilder {
-        this.claims.putAll(claims)
+        this.claims.add(all:claims)
         return this
     }
 
@@ -39,8 +39,8 @@ public class JWTBuilder{
         }
 
         // 头
-        header.put("typ", "JWT")
-        header.put("alg", alg.name())
+        header.add("typ", "JWT")
+        header.add("alg", alg.name())
         let hBase64 = header.serialize().toJson().toString().toArray() |> toBase64String |> JwtUtil.format
 
 
@@ -58,37 +58,37 @@ public class JWTBuilder{
 
 
     public func setIssuer( iss:String):JWTBuilder{
-        claims.put("iss", iss)
+        claims.add("iss", iss)
         return this
     }
 
     public func setSubject( sub:String):JWTBuilder{
-         claims.put("sub", sub)
+         claims.add("sub", sub)
          return this
     }
 
     public func setAudience( aud:String):JWTBuilder{
-         claims.put("aud", aud)
+         claims.add("aud", aud)
          return this
     }
 
     public func setExpiration( exp:DateTime):JWTBuilder{
-        claims.put("exp", exp.toString())
+        claims.add("exp", exp.toString())
          return this
     }
 
     public func setNotBefore( nbf:DateTime):JWTBuilder{
-        claims.put("nbf", nbf.toString())
+        claims.add("nbf", nbf.toString())
          return this
     }
 
     public func setIssuedAt( iat:DateTime):JWTBuilder{
-        claims.put("iat", iat.toString())
+        claims.add("iat", iat.toString())
          return this
     }
 
     public func setId( jti:String):JWTBuilder{
-        claims.put("jti", jti)
+        claims.add("jti", jti)
          return this
     }
 

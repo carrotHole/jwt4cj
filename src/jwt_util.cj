@@ -30,9 +30,9 @@ internal  class JwtUtil {
             case HS256 => hms(secret, HashType.SHA256, value)
             case HS384 => hms(secret, HashType.SHA384, value)
             case HS512 => hms(secret, HashType.SHA512, value)
-            case ES256 => ecdsa(secret, SHA256(), value)
-            case ES384 => ecdsa(secret, SHA384(), value)
-            case ES512 => ecdsa(secret, SHA512(), value)
+            case ES256 => ecdsa(secret, SHA256(), value, 256)
+            case ES384 => ecdsa(secret, SHA384(), value, 384)
+            case ES512 => ecdsa(secret, SHA512(), value, 512)
             case RS256 => rs(secret, SHA256(), value)
             case RS384 => rs(secret, SHA384(), value)
             case RS512 => rs(secret, SHA512(), value)
@@ -47,13 +47,10 @@ internal  class JwtUtil {
         return digest(HMAC(secret.toArray(),hashType),value) |> toBase64String |> format
     }
 
-    private static func ecdsa(secret:String, digestIns: Digest, value:String):String{    
-        ECDSAPrivateKey.decodeFromPem(secret)  
-
-
-        ECDSAPrivateKey.decodeFromPem("").sign(md)
-
-        return ECDSAPrivateKey.decodeFromPem(secret).sign(md) |> convertEcdsa
+    private static func ecdsa(secret:String, digestIns: Digest, value:String, size: Int64):String{    
+        let pri = ECDSAPrivateKey.decodeFromPem(secret)  
+        let md = digest(digestIns, value.toArray())
+        convertEcdsa(ECDSAPrivateKey.decodeFromPem(secret).sign(md), size)
     }
 
     private static func rs(secret:String, digestIns: Digest, value:String):String{

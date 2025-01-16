@@ -7,81 +7,92 @@ import encoding.base64.*
 import std.convert.*
 import encoding.hex.*
 import std.io.*
-
+import std.math.numeric.*
 
 @C
 struct ECDSA_SIG {}
 
 @C
-struct EVP_MD_CTX{}
+struct EVP_MD_CTX {}
 
 @C
 struct EVP_PKEY_CTX {}
+// @C
+// struct BIGNUM  {}
 
 @C
-struct EVP_MD{}
+struct EVP_MD {}
 
+foreign func d2i_ECDSA_SIG(psig: CPointer<CPointer<ECDSA_SIG>>, ppin: CPointer<CPointer<UInt8>>, len: Int64): CPointer<ECDSA_SIG>
 
+foreign func BN_bn2bin(a: CPointer<Int64>, to: CPointer<UInt8>): Int64
+foreign func BN_bn2binpad(a: CPointer<Int64>, to: CPointer<UInt8>): Int64
 
-foreign func d2i_ECDSA_SIG(sig:CPointer<CPointer<ECDSA_SIG>>, pp : CPointer<CString>, len:Int64):CPointer<ECDSA_SIG>
+foreign func ECDSA_SIG_get0_r(sig: CPointer<ECDSA_SIG>): CPointer<Int64>
 
-foreign func ECDSA_SIG_get0_r(sig:CPointer<ECDSA_SIG>):CPointer<Int64>
-foreign func ECDSA_SIG_get0_s(sig:CPointer<ECDSA_SIG>):CPointer<Int64>
+foreign func ECDSA_SIG_get0_s(sig: CPointer<ECDSA_SIG>): CPointer<Int64>
 
-foreign func EVP_DecodeBlock(t:CString, f:CString, m: Int64):Int64
+foreign func EVP_DecodeBlock(t: CString, f: CString, m: Int64): Int64
 
 /**
-* 将asn1签名转换为字符串拼接的格式
-* @param sig 签名
-*/
-public func convertEcdsa(sig:Array<UInt8>):String{
-     println("1")
-     println(sig)
-    var ppSig = unsafe{LibC.malloc<CPointer<ECDSA_SIG>>()}
+ * 将asn1格式签名转换为字符串拼接的格式
+ * @param sig 签名hash
+ */
+public func convertEcdsa(sig: Array<UInt8>, size: Int64): String {
+    var psig = unsafe { LibC.malloc<CPointer<ECDSA_SIG>>() }
 
-    var pp : CString = unsafe{LibC.mallocCString("")}
-    var cSigStr = unsafe{LibC.mallocCString(sig |> toBase64String)}
+    var cSigStr = unsafe { LibC.mallocCString(sig |> toBase64String) }
     println("2")
-    println("sig arr size ${sig.size}")
-    println("cstring size ${cSigStr.size()}")
-    println("base64 size  ${toBase64String(sig).size}")
-    var len = unsafe{EVP_DecodeBlock(pp, cSigStr,cSigStr.size())}
-    println("len ${len}")
+    var ppin = unsafe { LibC.malloc<CPointer<UInt8>>() }
+    var pSigRaw = unsafe { acquireArrayRawData(sig) }
+    unsafe { ppin.write(pSigRaw.pointer) }
+    unsafe { releaseArrayRawData(pSigRaw) }
     println("3")
-    var  pPp = unsafe{LibC.malloc<CString>()}
-    unsafe{pPp.write(pp)}
-
+    var pEcdsaSig = unsafe { d2i_ECDSA_SIG(psig, ppin, sig.size) }
     println("4")
-    var pEcdsaSig = unsafe{d2i_ECDSA_SIG(ppSig,pPp,cSigStr.size())}
-    println("5")
-    if(pEcdsaSig.isNull()){
+    if (pEcdsaSig.isNull()) {
         println("d2i_ECDSA_SIG error")
     }
-    println("-6")
-    var r = unsafe{ECDSA_SIG_get0_r(pEcdsaSig)}
+    println("5")
+    var r = unsafe { ECDSA_SIG_get0_r(pEcdsaSig) }
     println("6")
-    var s = unsafe{ECDSA_SIG_get0_s(pEcdsaSig)}
+    var s = unsafe { ECDSA_SIG_get0_s(pEcdsaSig) }
     println("7")
-    var rInt = unsafe{r.read()}
-    var sInt = unsafe{s.read()}
-    println(rInt)
-    println(sInt)
-    println(rInt.toString().toArray())
-    println(sInt.toString().toArray())
-    let res = (rInt.toString() + sInt.toString())
 
-    unsafe{
-        LibC.free(ppSig)
-        LibC.free(pp)
-        LibC.free(cSigStr)
-        LibC.free(pPp)
-        LibC.free(pEcdsaSig)
-        LibC.free(r)
-        LibC.free(s)
+    var a = VArray<UInt8,$66>(repeat: 0)
+    var b = VArray<UInt8,$66>(repeat: 0)
+
+    println(8)
+    
+    let rr = unsafe { BN_bn2bin(r, inout a) }
+    let sr = unsafe { BN_bn2bin(s, inout b) }
+    println(rr)
+    println(sr)
+    println(9)
+
+    let aa = Array<UInt8>(66,repeat:0)
+    for(i in 0..66){
+        aa[i] = a[i]
     }
+    println(aa)
+    let bb = Array<UInt8>(66,repeat:0)
+    for(i in 0..66){
+        bb[i] = b[i]
+    }
+    println(bb)
 
-    return res.toArray() |> toBase64String |> JwtUtil.format
-  
+    let res = aa.concat(bb)
+    println(10)
+
+    unsafe {
+        LibC.free(psig)
+        LibC.free(cSigStr)
+        LibC.free(ppin)
+        // LibC.free(ppin)
+        // LibC.free(pEcdsaSig)
+        // LibC.free(r)
+        // LibC.free(s)
+    }
+    println(res)
+    return res |> toBase64String |> JwtUtil.format
 }
-
-

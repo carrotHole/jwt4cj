@@ -46,7 +46,7 @@ public class JWSHeader {
             this._kvMap.get("alg").getOrThrow(){IllegalStateException("alg is not set")}
         }
         set(alg){
-            this._kvMap.put("alg",alg)
+            this._kvMap.add("alg",alg)
         }
     }
 

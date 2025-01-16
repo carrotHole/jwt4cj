@@ -34,8 +34,8 @@ main(): Int64 {
 
     let jwt = JWT.builder()
     let claims = HashMap<String,String>()
-    claims.put("name", "张w三2")
-    claims.put("age", "23")
+    claims.add("name", "张w三2")
+    claims.add("age", "23")
     // let token = jwt.signWith(HS256,secret)
     let token = jwt.signWith(ES512,privatekey)
     .setClaims(claims)
